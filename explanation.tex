@@ -25,7 +25,6 @@
 \renewcommand{\labelenumi}{(\theenumi)}
 
 \begin{document}
-
 \section{分類問題ー単純な機械学習アルゴリズムのトレーニング}
 与えられた入力をクラス$1$(陽性クラス)とクラス$-1$に分類する二値分類タスクを考える.
 トレーニングデータとして, 入力値$\bm{x}^{(i)} \in \R^{m}$と対応するクラス$y^{(i)} \in \{-1, 1\}$ $(i = 1, \dots, n)$が与えられているとする.
@@ -94,4 +93,68 @@
 パーセプトロンの収束が保証されるのは, 2つのクラスが線形分離可能で, 学習率が十分に小さい場合に限られる.
 2つのクラスが線形分離可能でない場合, データセットに対するトレーニングの最大回数(エポック)や誤分類の最大数を設定する必要がある.
 
+\subsection{ADALINE}
+ADALINE(ADAptive LInear NEuron)では, 重みの更新において階段関数ではなく線型関数を利用する.
+すなわち, 線型関数$\phi$を用いてコスト関数$J$を
+\begin{equation}
+    J(\bm{w}) = \frac{1}{2}\sum_{i = 1}^{n}(y^{(i)} - \phi(\bm{w}^{T}\bm{x}^{(i)}))^{2}
+\end{equation}
+で定義し, これを最小化する重み$\bm{w}$を探索する.
+その後, 最終的な予測はパーセプトロンと同様に階段関数で決定される.
+重みの更新は勾配降下法に基づいて行われる.
+\begin{algorithm}
+    (ADALINE)
+    \begin{enumerate}
+        \item
+        重み$\bm{w}$を小さい乱数で初期化する.
+        \item
+        重み$\bm{w}$を
+        \begin{equation}
+            \begin{cases}
+                \bm{w} \leftarrow \bm{w} + \Delta\bm{w} \\
+                \Delta\bm{w} = -\eta\nabla J(\bm{w})
+            \end{cases}
+        \end{equation}
+        により更新する.
+        ただし, $0 < \eta \leq 1$は学習率である.
+    \end{enumerate}
+\end{algorithm}
+線型活性化関数を$\phi(z) = az$とすると, 重みの更新式は
+\begin{equation}
+    \Delta w_{j} = a\eta\sum_{i = 1}^{n} (y^{(i)} - \phi(\bm{w}^{T}\bm{x}^{(i)}))x^{(i)}_{j}
+\end{equation}
+で与えられる. 
+
+このように, トレーニングデータの全サンプルに基づいて行われる勾配降下法をバッチ勾配降下法と呼ぶ.
+重みが早く収束するような学習率$\eta$を見つけるには, 一般にはある程度の実験が必要である.
+\begin{itemize}
+    \item
+    学習率が大きすぎると, エポックごとにコスト関数が増大していく可能性がある.
+    \item
+    学習率が小さすぎると, 重みが収束するまでのエポック数が大きくなる可能性がある.
+\end{itemize}
+
+勾配降下法の収束が早めるためには, 特徴量をスケーリングすることが有効である.
+特に, トレーニングデータを標準化するとコスト関数の条件数が1に近づくため, エポック数を抑えることができる.
+
+トレーニングデータが大規模になると, それら全体から重みを更新するバッチ勾配降下法は計算コストが高い.
+この場合, トレーニングサンプルごとに重みを更新するオンライン勾配降下法(確率的勾配降下法)が有効である.
+\begin{algorithm}
+    (オンライン勾配降下法)
+    \begin{enumerate}
+        \item
+        重み$\bm{w}$を小さい乱数で初期化する.
+        \item
+        各トレーニングサンプル$\bm{x}^{(i)}$に対して, 重み$\bm{w}$を
+        \begin{equation}
+            \begin{cases}
+                \bm{w} \leftarrow \bm{w} + \Delta\bm{w} \\
+                \Delta\bm{w} = a\eta(y^{(i)} - \phi(\bm{w}^{T}\bm{x}^{(i)}))\bm{x}^{(i)}
+            \end{cases}
+        \end{equation}
+        により更新する.
+        ただし, $0 < \eta \leq 1$は学習率である.
+    \end{enumerate}
+\end{algorithm}
+バッチ勾配降下法とは異なり, オンライン勾配降下法では総入力を計算するときの重み$\bm{w}$がトレーニングサンプルごとに変化することに注意する.
 \end{document}
