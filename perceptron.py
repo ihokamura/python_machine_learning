@@ -23,8 +23,7 @@ class Perceptron:
     * w_ : array-like, shape = (n_features, )
         weights after fit
     * errors_ : list
-        number 
-        of errors after each epoch
+        number of errors after each epoch
 
     # Notes
     -----
@@ -47,7 +46,7 @@ class Perceptron:
             training data
         * y : array-like, shape = (n_samples, )
             target variable
-            
+
         # Returns
         -----
         * self : Perceptron
