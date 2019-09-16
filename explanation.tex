@@ -1,0 +1,97 @@
+\documentclass[uplatex]{jsarticle}
+\usepackage{amsmath, amssymb, amsthm, bm}
+
+\theoremstyle{definition}
+\newtheorem{definition}{定義}[section]
+\newtheorem{algorithm}[definition]{アルゴリズム}
+\newtheorem{corollary}[definition]{系}
+\newtheorem{lemma}[definition]{補題}
+\newtheorem{proposition}[definition]{命題}
+\newtheorem{theorem}[definition]{定理}
+
+\numberwithin{equation}{section}
+
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\norm}[1]{\left|\left|#1\right|\right|}
+\newcommand{\relmiddle}[1]{\mathrel{}\middle#1\mathrel{}}
+
+\renewcommand{\d}{\mathrm{d}}
+\renewcommand{\L}{\mathcal{L}}
+\renewcommand{\proofname}{\bf{証明}}
+\renewcommand{\labelenumi}{(\theenumi)}
+
+\begin{document}
+
+\section{分類問題ー単純な機械学習アルゴリズムのトレーニング}
+与えられた入力をクラス$1$(陽性クラス)とクラス$-1$に分類する二値分類タスクを考える.
+トレーニングデータとして, 入力値$\bm{x}^{(i)} \in \R^{m}$と対応するクラス$y^{(i)} \in \{-1, 1\}$ $(i = 1, \dots, n)$が与えられているとする.
+決定関数$\phi$は総入力$z$, すなわち, 入力値$\bm{x}$と対応する重み$\bm{w}$の線型結合
+\begin{equation}
+    z = \bm{w}^{T}\bm{x} = \sum_{j = 1}^{m} w_{j}x_{j}
+\end{equation}
+を引数として受け取る.
+
+\subsection{パーセプトロン}
+パーセプトロンでは, サンプル$\bm{x}^{(i)}$に対する総入力が
+指定された閾値$\theta$より大きい場合はクラス1を予測し, 
+そうでない場合はクラス$-1$を予測する.
+つまり, 決定関数$\phi$として階段関数
+\begin{equation}
+    \phi(z) = 
+    \begin{cases}
+        1  & (z \geq \theta) \\
+        -1 & (z < \theta)
+    \end{cases}    
+\end{equation}
+を採用する.
+ここで, 数式を単純にするため, 閾値$\theta$を右辺に移動し, 
+添字$0$の入力を$x_{0} = 1$, 重みを$w_{0} = -\theta$と定義する.
+このとき, 総入力と決定関数はそれぞれ
+\begin{equation}
+    z = \bm{w}^{T}\bm{x} = \sum_{j = 0}^{m} w_{j}x_{j}
+\end{equation}
+\begin{equation}
+    \phi(z) = 
+    \begin{cases}
+        1  & (z \geq 0) \\
+        -1 & (z < 0)
+    \end{cases}    
+\end{equation}
+と表される.
+機械学習の分野では, 負の重み$w_{0} = -\theta$をバイアスユニットと呼ぶ.
+パーセプトロンの学習アルゴリズムは以下の通りである.
+\begin{algorithm}
+    (パーセプトロン)
+    \begin{enumerate}
+        \item
+        重み$w_{j}$を$0$または小さい乱数で初期化する.
+        \item
+        各トレーニングサンプル$\bm{x}^{(i)}$に対して以下を実行する.
+            \begin{enumerate}
+                \item
+                出力値$\hat{y}^{(i)}$を
+                \begin{equation}
+                    \hat{y}^{(i)} = \phi(\bm{w}^{T}\bm{x}^{(i)})
+                \end{equation}
+                により計算する.
+                \item
+                重み$w_{j}$を
+                \begin{equation}
+                    \begin{cases}
+                        w_{j} \leftarrow w_{j} + \Delta w_{j} \\
+                        \Delta w_{j} = \eta(y^{(i)} - \hat{y}^{(i)})x^{(i)}_{j}
+                    \end{cases}
+                \end{equation}
+                により更新する.
+                ただし, $0 < \eta \leq 1$は学習率である.
+            \end{enumerate}
+    \end{enumerate}
+\end{algorithm}
+パーセプトロンの収束が保証されるのは, 2つのクラスが線形分離可能で, 学習率が十分に小さい場合に限られる.
+2つのクラスが線形分離可能でない場合, データセットに対するトレーニングの最大回数(エポック)や誤分類の最大数を設定する必要がある.
+
+\end{document}
