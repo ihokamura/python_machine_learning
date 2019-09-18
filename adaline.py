@@ -2,6 +2,8 @@
 ADALINE classifier
 """
 
+from abc import abstractmethod
+
 import numpy as np
 
 
@@ -36,6 +38,7 @@ class Adaline:
         self.n_iter = n_iter
         self.random_state = random_state
 
+    @abstractmethod
     def fit(self, X, y):
         """
         fit to the training data
@@ -55,6 +58,7 @@ class Adaline:
 
         return self
 
+    @abstractmethod
     def net_input(self, X):
         """
         compute net input
@@ -69,8 +73,6 @@ class Adaline:
         * _ : array-like, shape = (n_samples, )
             net input, which means linear combination of weights and sample data (including bias)
         """
-
-        return X @ self.w_[1:] + self.w_[0]
 
     def activate(self, x):
         """
@@ -166,6 +168,23 @@ class AdalineGD(Adaline):
 
         return self
 
+    def net_input(self, X):
+        """
+        compute net input
+
+        # Parameters
+        -----
+        * X : array-like, shape = (n_samples, n_features)
+            training data
+
+        # Returns
+        -----
+        * _ : array-like, shape = (n_samples, )
+            net input, which means linear combination of weights and sample data (including bias)
+        """
+
+        return X @ self.w_[1:] + self.w_[0]
+
 
 class AdalineSGD(Adaline):
     """
@@ -255,7 +274,24 @@ class AdalineSGD(Adaline):
             self._update_weights(xi, target)
 
         return self
-            
+
+    def net_input(self, X):
+        """
+        compute net input
+
+        # Parameters
+        -----
+        * X : array-like, shape = (n_samples, n_features)
+            training data
+
+        # Returns
+        -----
+        * _ : array-like, shape = (n_samples, )
+            net input, which means linear combination of weights and sample data (including bias)
+        """
+
+        return X @ self.w_[1:] + self.w_[0]
+
     def _shuffle(self, X, y):
         """
         shuffle training data
