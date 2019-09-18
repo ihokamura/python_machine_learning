@@ -10,13 +10,12 @@ import numpy as np
 def plot_decision_regions(
     X, y,
     classifier,
-    test_index=None,
+    test_idx=None,
     resolution=0.02,
     xlabel='x', ylabel='y',
     loc='best'):
     """
     plot decision regions
-
 
     # Parameters
     -----
@@ -26,7 +25,9 @@ def plot_decision_regions(
         target variable
     * classifier : object
         instance of classifier, which needs to implement the following methods
-            classifier.predict : returns the prediction value of a sample
+            * classifier.predict : returns the prediction value of a sample
+    * test_idx : list
+        list of indexes of test data in X and y
     * resolution : float
         resolution of plot area
     * xlabel : string
@@ -55,14 +56,15 @@ def plot_decision_regions(
     plt.contourf(x1, x2, z, alpha=0.3, cmap=color_map)
 
     # plot training data
-    for index, label in enumerate(np.unique(y)):
-        plt.scatter(x=X[y == label, 0], y=X[y == label, 1],
-                    alpha=0.8, c=colors[index], marker=markers[index], label=label, edgecolor='black')
+    for color, marker, label in zip(colors, markers, np.unique(y)):
+        plot_index = (y == label)
+        plt.scatter(x=X[plot_index, 0], y=X[plot_index, 1],
+                    alpha=0.8, c=color, marker=marker, edgecolor='black', label=label)
 
     # plot test data
-    if test_index:
+    if test_idx:
         plt.scatter(x=X[test_idx, 0], y=X[test_idx, 1],
-                    alpha=1.0, linewidth=1, marker='o', s=100, label='test_set')
+                    alpha=1.0, c='', marker='o', edgecolor='black', linewidth=1, s=100, label='test_set')
 
     # configure plot area
     plt.xlim(x1.min(), x1.max())
