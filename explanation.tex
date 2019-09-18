@@ -26,7 +26,7 @@
 
 \begin{document}
 \section{分類問題ー単純な機械学習アルゴリズムのトレーニング}
-与えられた入力をクラス$1$(陽性クラス)とクラス$-1$に分類する二値分類タスクを考える.
+与えられた入力をクラス$1$(陽性クラス)とクラス$-1$(陰性クラス)に分類する二値分類タスクを考える.
 トレーニングデータとして, 入力値$\bm{x}^{(i)} \in \R^{m}$と対応するクラス$y^{(i)} \in \{-1, 1\}$ $(i = 1, \dots, n)$が与えられているとする.
 決定関数$\phi$は総入力$z$, すなわち, 入力値$\bm{x}$と対応する重み$\bm{w}$の線型結合
 \begin{equation}
@@ -156,5 +156,58 @@ ADALINE(ADAptive LInear NEuron)では, 重みの更新において階段関数�
         ただし, $0 < \eta \leq 1$は学習率である.
     \end{enumerate}
 \end{algorithm}
-バッチ勾配降下法とは異なり, オンライン勾配降下法では総入力を計算するときの重み$\bm{w}$がトレーニングサンプルごとに変化することに注意する.
+バッチ勾配降下法とは異なり, オンライン勾配降下法では総入力$z$を計算するときの重み$\bm{w}$がトレーニングサンプルごとに変化することに注意する.
+
+
+\section{分類問題ー機械学習ライブラリscikit-learnの活用}
+\subsection{ロジスティック回帰}
+与えられた入力をクラス$1$(陽性クラス)とクラス$0$(陰性クラス)に分類する二値分類タスクを考える.
+トレーニングデータとして, 入力値$\bm{x}^{(i)} \in \R^{m}$と対応するクラス$y^{(i)} \in \{-1, 1\}$ $(i = 1, \dots, n)$が与えられているとする.
+
+ロジスティック回帰では, 総入力にシグモイド関数を適用した値をその入力がクラス$1$に所属する確率と考える.
+すなわち, 決定関数$\phi$を
+\begin{equation}
+    \phi(z) = \frac{1}{1 + \exp(-z)}
+\end{equation}
+で定義し, 
+\begin{equation}
+    P(y = 1|\bm{x}, \bm{w}) = \phi(\bm{w}^{T}\bm{x})
+\end{equation}
+と解釈する.
+特に, 分類のみに関心がある場合は, 予測値を
+\begin{equation}
+    \hat{y} = 
+    \begin{cases}
+        1 & (\phi(\bm{w}^{T}\bm{x}) \geq 0.5) \\
+        0 & (\phi(\bm{w}^{T}\bm{x}) < 0.5)
+    \end{cases}
+\end{equation}
+とする.
+重み$\bm{w}$はトレーニングデータが正しく分類される確率の最尤推定として求められる.
+すなわち, コスト関数$J$
+\begin{equation}
+    \begin{cases}
+        J(\bm{w}) = \prod_{i = 1}^{n} \phi(z^{(i)})^{y^{(i)}}(1 - \phi(z^{(i)}))^{1 - y^{(i)}} \\
+        z^{(i)} = \bm{w}^{T}\bm{x}^{(i)}
+    \end{cases}
+\end{equation}
+を最大化する重み$\bm{w}$を探索する.
+ただし, 理論・実装の面から対数尤度を最小化する方が簡単であり, 通常は
+\begin{equation}
+    L(\bm{w}) = -\log J(\bm{w}) = -\sum_{i = 1}^{n} \left[y^{(i)}\log \phi(z^{(i)}) + (1 - y^{(i)})\log(1 - \phi(z^{(i)}))\right]
+\end{equation}
+を最小化する重み$\bm{w}$を探索する.
+\begin{align}
+    \frac{\partial \phi}{\partial w_{j}}(z)
+    &= -\frac{\exp(-z)}{(1 + \exp(-z))^{2}}x_{j} \\
+    &= -(1 - \phi(z))\phi(z)x_{j}
+\end{align}
+に注意すると, 
+\begin{align}
+    \frac{\partial L}{\partial w_{j}}(\bm{w})
+    &= \sum_{i = 1}^{n} \left[y^{(i)}(1 - \phi(z^{(i)})) - (1 - y^{(i)})\phi(z^{(i)})\right]x^{(i)}_{j} \\
+    &= \sum_{i = 1}^{n} (y^{(i)} - \phi(z^{(i)}))x^{(i)}_{j}
+\end{align}
+となるので, ロジスティック回帰における重みの更新規則はADALINEと同じ形式になる.
+ロジスティック回帰は線型分離可能な分類問題に対して高い性能を発揮する.
 \end{document}
