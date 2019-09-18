@@ -75,7 +75,7 @@ class Adaline:
     def activate(self, x):
         """
         compute activation function
-        
+
         # Parameters
         -----
         * x : array-like, shape = (n_samples, )
