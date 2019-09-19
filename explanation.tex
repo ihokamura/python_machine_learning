@@ -184,17 +184,17 @@ ADALINE(ADAptive LInear NEuron)では, 重みの更新において階段関数�
 \end{equation}
 とする.
 重み$\bm{w}$はトレーニングデータが正しく分類される確率の最尤推定として求められる.
-すなわち, コスト関数$J$
+すなわち, 尤度
 \begin{equation}
     \begin{cases}
-        J(\bm{w}) = \prod_{i = 1}^{n} \phi(z^{(i)})^{y^{(i)}}(1 - \phi(z^{(i)}))^{1 - y^{(i)}} \\
+        L(\bm{w}) = \prod_{i = 1}^{n} \phi(z^{(i)})^{y^{(i)}}(1 - \phi(z^{(i)}))^{1 - y^{(i)}} \\
         z^{(i)} = \bm{w}^{T}\bm{x}^{(i)}
     \end{cases}
 \end{equation}
 を最大化する重み$\bm{w}$を探索する.
-ただし, 理論・実装の面から対数尤度を最小化する方が簡単であり, 通常は
+ただし, 理論・実装の面から対数尤度を最小化する方が簡単であり, 通常はコスト関数
 \begin{equation}
-    L(\bm{w}) = -\log J(\bm{w}) = -\sum_{i = 1}^{n} \left[y^{(i)}\log \phi(z^{(i)}) + (1 - y^{(i)})\log(1 - \phi(z^{(i)}))\right]
+    J(\bm{w}) = -\log L(\bm{w}) = -\sum_{i = 1}^{n} \left[y^{(i)}\log \phi(z^{(i)}) + (1 - y^{(i)})\log(1 - \phi(z^{(i)}))\right]
 \end{equation}
 を最小化する重み$\bm{w}$を探索する.
 \begin{align}
@@ -204,10 +204,24 @@ ADALINE(ADAptive LInear NEuron)では, 重みの更新において階段関数�
 \end{align}
 に注意すると, 
 \begin{align}
-    \frac{\partial L}{\partial w_{j}}(\bm{w})
+    \frac{\partial J}{\partial w_{j}}(\bm{w})
     &= \sum_{i = 1}^{n} \left[y^{(i)}(1 - \phi(z^{(i)})) - (1 - y^{(i)})\phi(z^{(i)})\right]x^{(i)}_{j} \\
     &= \sum_{i = 1}^{n} (y^{(i)} - \phi(z^{(i)}))x^{(i)}_{j}
 \end{align}
 となるので, ロジスティック回帰における重みの更新規則はADALINEと同じ形式になる.
 ロジスティック回帰は線型分離可能な分類問題に対して高い性能を発揮する.
+
+過学習(モデルの汎化性能が低下する現象)を避けるため, コスト関数を正則化することがある.
+すなわち, 極端な重みにペナルティを課すことでモデルの複雑さを緩和する.
+例えば, $L^{2}$正則化では, 元のコスト関数に正則化項を追加した
+\begin{equation}
+    \tilde{J}(\bm{w}) = J(\bm{w}) + \frac{1}{2}\lambda\sum_{j = 1}^{m} w_{j}^{2}
+\end{equation}
+を新たなコスト関数とする\footnote{正則化項にバイアスユニット$w_{0}$を含めることもある.}.
+ここで, $\lambda$は正則化パラメータであり, 正則化の強さを制御する.
+なお, 後述するSVMの慣例に従い, scikit-learnの実装では逆正則化パラメータ
+\begin{equation}
+    C = \frac{1}{\lambda}
+\end{equation}
+を制御している.
 \end{document}
