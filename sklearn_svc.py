@@ -15,7 +15,7 @@ from plot_utility import plot_decision_regions
 def main():
     # prepare sample data and target variable
     labels = ['setosa', 'versicolor', 'virginica']
-    features = ['petal length', 'petal width']
+    features = ['petal length (cm)', 'petal width (cm)']
     D = IrisData(features, labels)
     X = D.X
     y = D.y

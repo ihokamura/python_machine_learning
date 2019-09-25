@@ -21,7 +21,7 @@ def plot_update_history(classifier):
 
 def main():
     # prepare training data and target variable
-    features = ['sepal length', 'petal length']
+    features = ['sepal length (cm)', 'petal length (cm)']
     labels = ['setosa', 'versicolor']
     D = IrisData(features, labels)
     X = D.X

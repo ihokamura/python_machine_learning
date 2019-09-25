@@ -8,7 +8,7 @@ from data_utility import IrisData
 
 
 def plot_iris_data():
-    features = ['sepal length', 'petal length']
+    features = ['sepal length (cm)', 'petal length (cm)']
     labels = ['setosa', 'versicolor', 'virginica']
     colors = ['red', 'blue', 'green']
     markers = ['o', 'x', '^']
