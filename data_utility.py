@@ -2,11 +2,59 @@
 utility to load sample data
 """
 
+import abc
+
 import numpy as np
 from sklearn.datasets import load_iris
 
 
-class IrisData:
+class SampleData(abc.ABC):
+    """
+    sample dataset in scikit-learn
+
+    # Parameters
+    -----
+    * features : iterable
+        list of features in training data
+    * labels : iterable
+        list of labels for target variable
+
+    # Attributes
+    -----
+    * X : array-like, shape = ((number of samples), (number of features))
+        training data
+    * y : array-like, shape = ((number of samples), )
+        target variable
+    """
+
+    def __init__(self, features, labels):
+        data_bunch = self.load_data()
+        feature_index = np.array(list(f in features for f in data_bunch.feature_names))
+        label_map = {value:name for value, name in enumerate(data_bunch.target_names)}
+        label_index = np.array(list(label_map[t] in labels for t in data_bunch.target))
+
+        X = data_bunch.data[label_index][:, feature_index]
+        y = data_bunch.target[label_index]
+
+        self.__X = X
+        self.__y = y
+
+    @property
+    def X(self):
+        return self.__X
+
+    @property
+    def y(self):
+        return self.__y
+
+    @abc.abstractclassmethod
+    def load_data(cls):
+        """
+        load the original data
+        """
+
+
+class IrisData(SampleData):
     """
     Iris dataset
 
@@ -34,22 +82,6 @@ class IrisData:
         target variable
     """
 
-    def __init__(self, features, labels):
-        data_bunch = load_iris()
-        feature_index = np.array(list(f in features for f in data_bunch.feature_names))
-        label_map = {value:name for value, name in enumerate(data_bunch.target_names)}
-        label_index = np.array(list(label_map[t] in labels for t in data_bunch.target))
-
-        X = data_bunch.data[label_index][:, feature_index]
-        y = data_bunch.target[label_index]
-
-        self.__X = X
-        self.__y = y
-
-    @property
-    def X(self):
-        return self.__X
-
-    @property
-    def y(self):
-        return self.__y
+    @classmethod
+    def load_data(cls):
+        return load_iris()
