@@ -2,12 +2,12 @@
 ADALINE classifier
 """
 
-from abc import abstractmethod
+import abc
 
 import numpy as np
 
 
-class Adaline:
+class Adaline(abc.ABC):
     """
     ADALINE (adaptive linear neuron) classifier
 
@@ -38,7 +38,7 @@ class Adaline:
         self.n_iter = n_iter
         self.random_state = random_state
 
-    @abstractmethod
+    @abc.abstractmethod
     def fit(self, X, y):
         """
         fit to the training data
@@ -58,7 +58,7 @@ class Adaline:
 
         return self
 
-    @abstractmethod
+    @abc.abstractmethod
     def net_input(self, X):
         """
         compute net input
