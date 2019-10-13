@@ -423,4 +423,63 @@ one-hotエンコーディングを使用する場合, 多重共線性の問題�
 \end{align}
 という変換である.
 標準化には外れ値に対する情報が失われないという特徴がある.
+
+\subsection{有益な特徴量の選択}
+汎化誤差を減らすための方法には以下のようなものがある.
+\begin{itemize}
+    \item
+    トレーニングデータをさらに集める.
+    \item
+    正則化により複雑さに対してペナルティを課す.
+    \item
+    パラメータの個数が少ない単純なモデルを選択する.
+    \item
+    データの次元を減らす.
+\end{itemize}
+実用上, より多くのトレーニングデータを集めることは難しい.
+ここでは, 正則化と特徴選択による次元削減の手法を考えることにする.
+
+\subsubsection{$L^{1}$正則化と$L^{2}$正則化}
+コスト関数$J(\bm{w})$が与えられているとする.
+このとき, $L^{1}$正則化では
+\begin{equation}
+    \tilde{J}(\bm{w}) = J(\bm{w}) + \norm{w}_{1}, \quad \norm{w}_{1} = \sum_{i = 1}^{n} |w_{i}|
+\end{equation}
+を新たなコスト関数として最適化問題を解く.
+$L^{1}$正則化はスパース性, すなわち多くの要素が$0$となるような重み$\bm{w}$を導く.
+一方, $L^{2}$正則化では
+\begin{equation}
+    \tilde{J}(\bm{w}) = J(\bm{w}) + \norm{w}_{2}^{2}, \quad \norm{w}_{2} = \left(\sum_{i = 1}^{n} w_{i}^{2}\right)^{1/2}
+\end{equation}
+を新たなコスト関数として最適化問題を解く.
+$L^{2}$正則化は重みベクトル$\bm{w}$を$\bm{0}$に近づける効果をもたらす.
+
+\subsubsection{逐次特徴選択アルゴリズム}
+逐次後退選択(SBS)アルゴリズムは, 分類器の性能に与える影響が最も小さい特徴量を逐次的に取り除くことで汎化誤差の削減を目指す.
+\begin{algorithm}
+    (SBS)
+    特徴量の添え字集合を$S = \{1, \dots, m\}$, 目標の次元を$k \leq m$とする.
+    $|S| = k$となるまで, 以下の手順を繰り返す.
+    \begin{enumerate}
+        \item
+        次に削除する添え字$\mu$を
+        \begin{equation}
+            \left\{
+                \begin{aligned}
+                    \mu = \arg\max_{j \in S} J(\bm{w}; r_{j}(\bm{x}^{(1)}), \dots, r_{j}(\bm{x}^{(m)})) \\
+                    r_{j}(\bm{x}) = (x_{1}, \dots, x_{j - 1}, x_{j + 1}, \dots, x_{m})
+                \end{aligned}
+            \right.
+        \end{equation}
+        により決定する.
+        \item
+        添え字集合$S$を
+        \begin{equation}
+            S \leftarrow S \setminus \{j\}
+        \end{equation}
+        により更新する.
+    \end{enumerate}
+\end{algorithm}
+
+SBSアルゴリズムのように, 逐次的に特徴量を選択していくアルゴリズムを一般に逐次特徴選択アルゴリズムと呼ぶ.
 \end{document}
