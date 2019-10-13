@@ -31,14 +31,19 @@ def main():
     y_combined = np.hstack((y_train, y_test))
 
     # fit classifiers
-    classifier = SVC(C=1.0, kernel='linear', random_state=1).fit(X_train_std, y_train)
+    classifiers = [
+        SVC(C=1.0, kernel='linear', random_state=1).fit(X_train_std, y_train),
+        SVC(C=1.0, kernel='rbf', random_state=1, gamma=0.2).fit(X_train_std, y_train),
+        SVC(C=1.0, kernel='rbf', random_state=1, gamma=100.0).fit(X_train_std, y_train)
+    ]
 
-    # show accuracy
-    y_pred = classifier.predict(X_test_std)
-    print('misclassified samples: {}'.format(np.sum(y_test != y_pred)))
+    for classifier in classifiers:
+        # show accuracy
+        y_pred = classifier.predict(X_test_std)
+        print('misclassified samples: {}'.format(np.sum(y_test != y_pred)))
 
-    # show decision regions
-    plot_decision_regions(X_combined_std, y_combined, classifier=classifier, test_idx=list(range(105, 150)))
+        # show decision regions
+        plot_decision_regions(X_combined_std, y_combined, classifier=classifier, test_idx=list(range(105, 150)))
 
 
 if __name__ == '__main__':
