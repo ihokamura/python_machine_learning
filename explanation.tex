@@ -250,6 +250,113 @@ OvRでは, 最終的な分類器の予測値を
 \end{equation}
 とする.
 
+\subsection{サポートベクトルマシン}
+与えられた入力をクラス$1$(陽性クラス)とクラス$-1$(陰性クラス)に分類する二値分類タスクを考える.
+トレーニングデータとして, 入力値$\bm{x}^{(i)} \in \R^{m}$と対応するクラス$y^{(i)} \in \{-1, 1\}$ $(i = 1, \dots, n)$が与えられているとする.
+サポートベクトルマシン(SVM)はマージンを最大化することにより2値分類を行う.
+いま, データセットを超平面
+\begin{equation}
+    w_{0} + \bm{w}^{T}\bm{x} = 0
+\end{equation}
+で分離することを考える.
+この超平面に対して2つの超平面
+\begin{align}
+    w_{0} + \bm{w}^{T}\bm{x} &= 1 \\
+    w_{0} + \bm{w}^{T}\bm{x} &= -1
+\end{align}
+の距離をマージンと呼ぶ.
+マージンは$\bm{w}$の関数として
+\begin{equation}
+    \frac{2}{\norm{\bm{w}}}
+\end{equation}
+と表される.
+SVMでは, 正負の超平面のそれぞれの内側に陽性クラスと陰性クラスが含まれるような重み$\bm{w}$のうち, マージンが最大になるものを探索する.
+すなわち, 
+\begin{equation}
+    \left\{
+        \begin{aligned}
+            & \min_{\bm{w}} \frac{1}{2}\norm{\bm{w}}^{2} \\
+            & y^{(i)}(w_{0} + \bm{w}^{T}\bm{x}^{(i)}) \geq 1 \quad (i = 1, \dots, n)
+        \end{aligned}
+    \right.
+\end{equation}
+という最適化問題に帰着される.
+この定式化は誤分類を許容しないことからハードマージンと呼ばれる.
+これに対して, 誤分類を許容する定式化はソフトマージンと呼ばれる.
+具体的には, 線型制約を緩和するスラック変数$\xi^{(1)}, \dots, \xi^{(n)}$を導入し, 
+\begin{equation}
+    \left\{
+        \begin{aligned}
+            & \min_{\bm{w}} \frac{1}{2}\norm{\bm{w}}^{2} + C\sum_{i = 1}^{n} \xi^{(i)} \\
+            & y^{(i)}(w_{0} + \bm{w}^{T}\bm{x}^{(i)}) \geq 1 - \xi^{(i)} \quad (i = 1, \dots, n) \\
+            & \xi^{(i)} \geq 0 \quad (i = 1, \dots, n) \\
+            & \xi^{(i)} \geq 1 - y^{(i)}(w_{0} + \bm{w}^{T}\bm{x}^{(i)}) \quad (i = 1, \dots, n)
+        \end{aligned}
+    \right.
+\end{equation}
+という最適化問題を考える.
+コスト関数に追加された項$\sum_{i = 1}^{n} \xi^{(i)}$は誤分類に対するペナルティであり\footnote{$\sum_{i = 1}^{n} \xi^{(i)} \leq K$のとき, 誤分類したサンプルは$K$個以下であることが示される.}, $C$はそれを制御する正則化パラメータである.
+
+SVMは制約付き最適化問題である.
+そこで, Lagrange関数
+\begin{equation}
+    L(\bm{w}, \bm{\xi}, \bm{\alpha}, \bm{\mu}) = \frac{1}{2}\norm{w}^{2} + C\sum_{i = 1}^{n} \xi^{(i)} - \sum_{i = 1}^{n} \alpha^{(i)}(y^{(i)}(w_{0} + \bm{w}^{T}\bm{x}^{(i)}) - 1 + \xi^{(i)}) - \sum_{i = 1}^{n} \mu^{(i)}\xi^{(i)}
+\end{equation}
+を導入し, 双対問題
+\begin{equation}
+    \max_{\bm{\alpha} \geq \bm{0}, \bm{\mu} \geq \bm{0}} \min_{\bm{w}, \bm{\xi}} L(\bm{w}, \bm{\xi}, \bm{\alpha}, \bm{\mu})
+\end{equation}
+を考える.
+Lagrange関数$L$は主変数$\bm{w}$, $\bm{\xi}$に関して凸関数であるから, 最適値$\bm{w}^{*}$, $\bm{\xi}^{*}$において
+\begin{align}
+    0 &= \frac{\partial L}{\partial w_{0}}L(\bm{w}^{*}, \bm{\xi}^{*}, \bm{\alpha}, \bm{\mu}) = -\sum_{i = 1}^{n} \alpha^{(i)}y^{(i)} \\
+    \bm{0} &= \frac{\partial L}{\partial \bm{w}}L(\bm{w}^{*}, \bm{\xi}^{*}, \bm{\alpha}, \bm{\mu}) = \bm{w} - \sum_{i = 1}^{n} \alpha^{(i)}y^{(i)}\bm{x}^{(i)} \\
+    \bm{0} &= \frac{\partial L}{\partial \bm{\xi}}L(\bm{w}^{*}, \bm{\xi}^{*}, \bm{\alpha}, \bm{\mu}) = C\bm{1} - \bm{\alpha} - \bm{\mu}
+\end{align}
+が成り立つ.
+したがって, 双対問題は
+\begin{equation}
+    \left\{
+        \begin{aligned}
+            & \min_{\bm{\alpha}} \sum_{i = 1}^{n} \sum_{j = 1}^{n} \frac{1}{2}\alpha^{(i)}\alpha^{(j)}y^{(i)}y^{(j)}\bm{x}^{(i)T}\bm{x}^{(j)} - \sum_{i = 1}^{n} \alpha^{(i)} \\
+            & \sum_{i = 1}^{n} \alpha^{(i)}y^{(i)} = 0 \\
+            & 0 \leq \alpha^{(i)} \leq C \quad (i = 1, \dots, n)
+        \end{aligned}
+    \right.
+\end{equation}
+という最適化問題に帰着される.
+最終的なコスト関数では入力値の内積$\bm{x}^{(i)T}\bm{x}^{(j)}$のみ現れる.
+これに注目すると, SVMを非線型分類問題に拡張することができる.
+いま, 入力値の変換関数$\bm{\phi} \colon \R^{m} \to \R^{m'}$が与えられたとして, 超曲面
+\begin{equation}
+    w_{0} + \bm{w}^{T}\bm{\phi}(\bm{x}) = 0
+\end{equation}
+に関するSVMを考える.
+これは, $\bm{\phi}(\bm{x}^{(1)}), \dots, \bm{\phi}(\bm{x}^{(n)})$を入力値とするSVMにほかならない.
+このとき, 
+\begin{equation}
+    K(\bm{x}^{(i)}, \bm{x}^{(j)}) = \bm{\phi}(\bm{x}^{(i)})^{T}\bm{\phi}(\bm{x}^{(j)})
+\end{equation}
+を満たす関数$K$が存在したとすると, 上の双対問題は
+\begin{equation}
+    \left\{
+        \begin{aligned}
+            \min_{\bm{\alpha}} \sum_{i = 1}^{n} \sum_{j = 1}^{n} \frac{1}{2}\alpha^{(i)}\alpha^{(j)}y^{(i)}y^{(j)}K(\bm{x}^{(i)}, \bm{x}^{(j)}) - \sum_{i = 1}^{n} \alpha^{(i)} \\
+            \sum_{i = 1}^{n} \alpha^{(i)}y^{(i)} = 0 \\
+            0 \leq \alpha^{(i)} \leq C \quad (i = 1, \dots, n)
+        \end{aligned}
+    \right.
+\end{equation}
+と読み変えられる.
+特に, 変換$\bm{\phi}(\bm{x}^{(i)})$を陽に計算する必要がないことに注意する.
+このような関数$K$をカーネル関数といい, カーネル関数を利用したSVMをカーネルSVMという.
+代表的なカーネル関数としてRBFカーネル
+\begin{equation}
+    K(\bm{x}^{(i)}, \bm{x}^{(j)}) = \exp\left(-\gamma\norm{\bm{x}^{(i)} - \bm{x}^{(j)}}^{2}\right)
+\end{equation}
+が挙げられる.
+ただし, $\gamma > 0$はハイパーパラメータである.
+
 
 \section{データ前処理ーよりよいトレーニングセットの構築}
 \subsection{欠測データへの対処}
