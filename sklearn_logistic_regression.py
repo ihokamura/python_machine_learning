@@ -38,7 +38,7 @@ def main():
     print('misclassified samples: {}'.format(np.sum(y_test != y_pred)))
 
     # show decision regions
-    plot_decision_regions(X_combined_std, y_combined, classifier=classifier, test_idx=list(range(105, 150)))
+    plot_decision_regions(X_combined_std, y_combined, classifier=classifier, test_idx=list(range(len(y_train), len(y))))
 
     # show effect of regularization parameter
     weights = []
@@ -49,6 +49,7 @@ def main():
         weights.append(classifier.coef_[1])
         params.append(C)
     weights = np.array(weights)
+    plt.axhline(y=0, linewidth=1, linestyle='--', color='k')
     plt.plot(params, weights[:, 0], label='petal length')
     plt.plot(params, weights[:, 1], linestyle='--', label='petal width')
     plt.xscale('log')
