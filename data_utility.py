@@ -5,7 +5,7 @@ utility to load sample data
 import abc
 
 import numpy as np
-from sklearn.datasets import load_iris, load_wine
+from sklearn.datasets import load_breast_cancer, load_iris, load_wine
 
 
 class SampleData(abc.ABC):
@@ -159,3 +159,67 @@ class WineData(SampleData):
     @classmethod
     def load_data(cls):
         return load_wine()
+
+
+class BreastCancerData(SampleData):
+    """
+    Breast Cancer Wisconsin dataset
+
+    # Parameters
+    -----
+    * features : iterable
+        list of features in training data
+        All the features are retrieved if None.
+        The Breast Cancer Wisconsin dataset has the following features.
+            * mean radius
+            * mean texture
+            * mean perimeter
+            * mean area
+            * mean smoothness
+            * mean compactness
+            * mean concavity
+            * mean concave points
+            * mean symmetry
+            * mean fractal dimension
+            * radius error
+            * texture error
+            * perimeter error
+            * area error
+            * smoothness error
+            * compactness error
+            * concavity error
+            * concave points error
+            * symmetry error
+            * fractal dimension error
+            * worst radius
+            * worst texture
+            * worst perimeter
+            * worst area
+            * worst smoothness
+            * worst compactness
+            * worst concavity
+            * worst concave points
+            * worst symmetry
+            * worst fractal dimension
+    * labels : iterable
+        list of labels for target variable
+        All the labels are retrieved if None.
+        The Breast Cancer Wisconsin dataset has the following labels.
+            * malignant
+            * benign
+
+    # Attributes
+    -----
+    * X : array-like, shape = ((number of samples), (number of features))
+        training data
+    * y : array-like, shape = ((number of samples), )
+        target variable
+    * features : list
+        list of features in training data
+    * labels : list
+        list of labels for target variable
+    """
+
+    @classmethod
+    def load_data(cls):
+        return load_breast_cancer()
