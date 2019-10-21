@@ -10,7 +10,6 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 from data_utility import BreastCancerData
-from plot_utility import plot_decision_regions
 
 
 def main():
@@ -27,7 +26,7 @@ def main():
     pipeline = make_pipeline(
         StandardScaler(),
         PCA(n_components=2),
-        LogisticRegression(random_state=1))
+        LogisticRegression(solver='liblinear', random_state=1))
     pipeline.fit(X_train, y_train)
 
     # show accuracy

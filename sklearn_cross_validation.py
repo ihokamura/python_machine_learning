@@ -10,7 +10,6 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 from data_utility import BreastCancerData
-from plot_utility import plot_decision_regions
 
 
 def main():
