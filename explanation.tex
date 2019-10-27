@@ -1,5 +1,5 @@
 \documentclass[uplatex]{jsarticle}
-\usepackage{amsmath, amssymb, amsthm, bm}
+\usepackage{amsmath, amssymb, amsthm, bm, url}
 
 \theoremstyle{definition}
 \newtheorem{definition}{定義}[section]
@@ -577,6 +577,230 @@ $L^{2}$正則化は重みベクトル$\bm{w}$を$\bm{0}$に近づける効果を
 SBSアルゴリズムのように, 逐次的に特徴量を選択していくアルゴリズムを一般に逐次特徴選択アルゴリズムと呼ぶ.
 
 
+\section{次元削減でデータを圧縮する}
+\subsection{主成分分析による教師なし次元削減}
+主成分分析(PCA)は特徴抽出と次元削減のための線型変換である.
+PCAの目的は最大の分散方向を含む部分空間に高次元データを射影することである.
+\begin{algorithm}
+    (PCA)
+    データセット$\bm{x}^{(1)}, \dots, \bm{x}^{(n)} \in \R^{d}$と特徴空間の次元$k \leq d$が与えられたとする.
+    \begin{enumerate}
+        \item
+        データセットを標準化し, それを改めて$\bm{x}^{(1)}, \dots, \bm{x}^{(n)}$とする.
+
+        \item
+        共分散行列$\bm{\Sigma}$を
+        \begin{equation}
+            \left\{
+            \begin{aligned}
+                &\sigma_{ij} = \frac{1}{n}\sum_{k = 1}^{n} (x^{(k)}_{i} - \mu_{i})(x^{(k)}_{j} - \mu_{j}) \\
+                &\bm{\mu} = \frac{1}{n}\sum_{k = 1}^{n} \bm{x}^{(k)}
+            \end{aligned}
+            \right.
+        \end{equation}
+        により計算する.
+
+        \item
+        共分散行列を固有値分解する.
+        \begin{equation}
+            \left\{
+            \begin{aligned}
+                &\bm{\Sigma} = \bm{V}^{T}\bm{\Lambda}\bm{V} \\
+                &\bm{V} = (\bm{v}_{1}, \dots, \bm{v}_{d}), \quad \bm{V}^{T}\bm{V} = \bm{I} \\
+                &\bm{\Lambda} = \mathrm{diag}(\lambda_{1}, \dots, \lambda_{d}) \quad (\lambda_{1} \geq \dots \geq \lambda_{d})
+            \end{aligned}
+            \right.
+        \end{equation}
+
+        \item
+        部分空間にデータ点を射影する.
+        \begin{equation}
+            \left\{
+            \begin{aligned}
+                &\bm{x}' = \bm{W}^{T}\bm{x} \\
+                &\bm{W} = (\bm{v}_{1}, \dots, \bm{v}_{k})
+            \end{aligned}
+            \right.
+        \end{equation}
+    \end{enumerate}
+\end{algorithm}
+
+共分散行列の固有ベクトル$\bm{v}_{1}, \dots, \bm{v}_{d}$を主成分という.
+また, 固有値全体の和に対する特定の固有値の比率$\lambda_{j}/\sum_{i = 1}^{d} \lambda_{i}$を分散説明率という.
+大きな固有値を持つ主成分が張る部分空間にデータ点を射影することにより, そのデータ点が持つ情報を保ちながら次元を削減することを目指す.
+
+\subsection{線型判別分析による教師ありデータ圧縮}
+線型判別分析(LDA)は学習アルゴリズムとしても次元削減の手段としても用いられる.
+LDAの目的はクラスを最もよく分離する部分空間に高次元データを射影することである.
+\begin{algorithm}
+    (LDA)
+    データセット$\bm{x}^{(1)}, \dots, \bm{x}^{(n)} \in \R^{d}$, 対応するクラスラベル$y^{(1)}, \dots, y^{(n)} \in \{1, \dots, c\}$および特徴空間の次元$k \leq d$が与えられたとする.
+    \begin{enumerate}
+        \item
+        データセットを標準化し, それを改めて$\bm{x}^{(1)}, \dots, \bm{x}^{(n)}$とする.
+
+        \item
+        クラス間変動行列$\bm{S}_{B}$およびクラス内変動行列$\bm{S}_{W}$を
+        \begin{align}
+            \bm{S}_{B} &= \sum_{l = 1}^{c}n_{l}(\bm{m}_{l} - \bm{m})(\bm{m}_{l} - \bm{m})^{T} \\
+            \bm{S}_{W} &= \sum_{l = 1}^{c}\sum_{y^{(i)} = l}\frac{1}{n_{l}}(\bm{x}^{(i)} - \bm{m}_{i})(\bm{x}^{(i)} - \bm{m}_{i})^{T}
+        \end{align}
+        により計算する.
+        ただし, 
+        \begin{align}
+            n_{l} &= |\{i | y^{(i)} = l\}| \\
+            \bm{m}_{l} &= \frac{1}{n_{l}}\sum_{y^{(i)} = l} \bm{x}^{(i)} \\
+            \bm{m} &= \frac{1}{n}\sum_{i = 1}^{n} \bm{x}^{(i)}
+        \end{align}
+        である.
+
+        \item
+        行列$\bm{S}_{W}^{-1}\bm{S}_{B}$を固有値分解する.
+        \begin{equation}
+            \left\{
+            \begin{aligned}
+                &\bm{S}_{W}^{-1}\bm{S}_{B} = \bm{V}^{T}\bm{\Lambda}\bm{V} \\
+                &\bm{V} = (\bm{v}_{1}, \dots, \bm{v}_{d}), \quad \bm{V}^{T}\bm{V} = \bm{I} \\
+                &\bm{\Lambda} = \mathrm{diag}(\lambda_{1}, \dots, \lambda_{d}) \quad (\lambda_{1} \geq \dots \geq \lambda_{d})
+            \end{aligned}
+            \right.
+        \end{equation}
+
+        \item
+        部分空間にデータ点を射影する.
+        \begin{equation}
+            \left\{
+            \begin{aligned}
+                &\bm{x}' = \bm{W}^{T}\bm{x} \\
+                &\bm{W} = (\bm{v}_{1}, \dots, \bm{v}_{k})
+            \end{aligned}
+            \right.
+        \end{equation}
+    \end{enumerate}
+\end{algorithm}
+
+クラス間変動行列$\bm{S}_{B}$は階数が$1$以下の行列の和であるから, $0$でない固有値は高々$c - 1$個である.
+つまり, LDAは最大で$c$個のクラスを線型分離することができる.
+LDAを次元削減の手法として利用する場合は, 新しい特徴空間で機械学習アルゴリズムを実行すればよい.
+
+\subsection{カーネル主成分分析を使った非線形写像}
+カーネルPCA(KPCA)はカーネルトリックによりPCAを非線形問題に拡張したものである.
+いま, 特徴空間への変換関数$\phi$が与えられたとする.
+特徴空間におけるデータセットの平均を
+\begin{equation}
+    \bm{\xi} = \frac{1}{n}\sum_{i = 1}^{n} \phi(\bm{x}^{(i)})
+\end{equation}
+とすると, 特徴空間における共分散行列$\bm{\Sigma}$は
+\begin{equation}
+    \bm{\Sigma} = \frac{1}{n}\sum_{i = 1}^{n}(\phi(\bm{x}^{(i)}) - \bm{\xi})(\phi(\bm{x}^{(i)}) - \bm{\xi})^{T}
+\end{equation}
+と表される.
+したがって, $\lambda$を$\bm{\Sigma}$の固有値, $\bm{v}$を$\lambda$に対する$\bm{\Sigma}$の固有ベクトルとすると
+\begin{equation}
+    \lambda\bm{v} = \bm{\Sigma}\bm{v} = \frac{1}{n}\sum_{i = 1}^{n}(\phi(\bm{x}^{(i)}) - \bm{\xi})(\phi(\bm{x}^{(i)}) - \bm{\xi})^{T}\bm{v}
+\end{equation}
+すなわち, 
+\begin{align}
+    \bm{v} &= \frac{1}{n\lambda}\sum_{i = 1}^{n}a^{(i)}(\phi(\bm{x}^{(i)}) - \bm{\xi}) \\
+    a^{(i)} &= (\phi(\bm{x}^{(i)}) - \bm{\xi})^{T}\bm{v}
+\end{align}
+が成り立つ.
+ここで, 
+\begin{align}
+    \phi(\bm{X}) &= (\phi(\bm{x}^{(1)}), \dots, \phi(\bm{x}^{(n)}))^{T} \\
+    \bm{\Xi} &= (\bm{\xi}, \dots, \bm{\xi})^{T}
+\end{align}
+とおくと
+\begin{align}
+    \bm{v} &= \frac{1}{n\lambda}(\phi(\bm{X}) - \bm{\Xi})^{T}\bm{a} \\
+    \bm{a} &= (\phi(\bm{X}) - \bm{\Xi})\bm{v}
+\end{align}
+であるから, 
+\begin{equation}
+    \bm{L} = (\phi(\bm{X}) - \bm{\Xi})(\phi(\bm{X}) - \bm{\Xi})^{T}
+\end{equation}
+として
+\begin{align*}
+    n\lambda\bm{L}\bm{a}
+    &= (\phi(\bm{X}) - \bm{\Xi})(\phi(\bm{X}) - \bm{\Xi})^{T}(\phi(\bm{X}) - \bm{\Xi})\bm{v} \\
+    &= \phi(\bm{X}) - \bm{\Xi})(\phi(\bm{X}) - \bm{\Xi})^{T}(\phi(\bm{X}) - \bm{\Xi})(\phi(\bm{X}) - \bm{\Xi})^{T}\bm{a} \\
+    &= \bm{L}^{2}\bm{a}
+\end{align*}
+が成り立つ.
+$L$は対称行列であり, それゆえ特徴空間全体を張る固有ベクトル集合を持つので
+\begin{equation}
+    \bm{L}\bm{a} = n\lambda\bm{a}
+\end{equation}
+を得る.
+つまり, $\bm{a}$は$\bm{L}$の固有ベクトルであり, これから特徴空間における共分散行列$\bm{\Sigma}$の固有ベクトルが求まる.
+\begin{align*}
+    L_{ij}
+    &= (\phi(\bm{x}^{(i)}) - \bm{\xi})^{T}(\phi(\bm{x}^{(j)}) - \bm{\xi}) \\
+    &= \phi(\bm{x}^{(i)})^{T}\phi(\bm{x}^{(j)}) - \frac{1}{n}\sum_{k = 1}^{n}\phi(\bm{x}^{(k)})^{T}\phi(\bm{x}^{(j)}) - \frac{1}{n}\sum_{l = 1}^{n}\phi(\bm{x}^{(i)})^{T}\phi(\bm{x}^{(l)}) + \frac{1}{n^{2}}\sum_{k = 1}^{n} \sum_{l = 1}^{n}\phi(\bm{x}^{(k)})^{T}\phi(\bm{x}^{(l)})
+\end{align*}
+であるから, カーネル行列$\bm{K}$を
+\begin{equation}
+    K_{ij} = \phi(\bm{x}^{(i)})^{T}\phi(\bm{x}^{(j)})
+\end{equation}
+により定義すると, 
+\begin{equation}
+    \bm{L} = \bm{K} - \bm{1}_{n}\bm{K} - \bm{K}\bm{1}_{n} + \bm{1}_{n}\bm{K}\bm{1}_{n}
+\end{equation}
+を得る.
+カーネルトリック, すなわち
+\begin{equation}
+    \mathcal{K}(\bm{x}, \bm{y}) = \phi(\bm{x})^{T}\phi(\bm{y})
+\end{equation}
+を満たすカーネル関数$\mathcal{K}$を利用すると, 変換関数$\phi$を明示的に計算することなくカーネル行列$\bm{K}$(および中心化行列$\bm{L}$)が求まる.
+KPCAでは, 特徴空間における共分散行列ではなくカーネル行列を固有値分解する.
+\begin{algorithm}
+    (KPCA)
+    データセット$\bm{x}^{(1)}, \dots, \bm{x}^{(n)} \in \R^{d}$と特徴空間の次元$k \leq d$が与えられたとする.
+    \begin{enumerate}
+        \item
+        中心化行列$\bm{L}$を
+        \begin{equation}
+            \bm{L} = \bm{K} - \bm{1}_{n}\bm{K} - \bm{K}\bm{1}_{n} + \bm{1}_{n}\bm{K}\bm{1}_{n}
+        \end{equation}
+        により計算する.
+
+        \item
+        中心化行列を固有値分解する.
+        \begin{equation}
+            \left\{
+            \begin{aligned}
+                &\bm{L} = \bm{A}^{T}\bm{\Theta}\bm{A} \\
+                &\bm{A} = (\bm{a}^{(1)}, \dots, \bm{a}^{(n)}), \quad \bm{A}^{T}\bm{A} = \bm{I} \\
+                &\bm{\Theta} = \mathrm{diag}(\theta_{1}, \dots \theta_{n}) \quad (\theta_{1} \geq \dots \geq \theta_{n})
+            \end{aligned}
+            \right.
+        \end{equation}
+
+        \item
+        部分空間にデータ点を射影する.
+        \begin{equation}
+            \left\{
+            \begin{aligned}
+                &\bm{x}' = \bm{W}^{T}\phi(\bm{x}) \\
+                &\bm{W} = (\bm{v}_{1}, \dots, \bm{v}_{k}) \\
+                &\bm{v}_{i} = \frac{1}{\theta_{i}}(\phi(\bm{X}) - \bm{\Xi})^{T}\bm{a}^{(i)}
+            \end{aligned}
+            \right.
+        \end{equation}
+    \end{enumerate}
+
+部分空間への射影は変換関数$\phi$を明示的に計算することなく求まる.
+実際, 
+\begin{align*}
+    x'_{i}
+    &= \bm{v}_{i}^{T}\phi(\bm{x}) \\
+    &= \frac{1}{\theta_{i}}\bm{a}^{(i)T}(\phi(\bm{X}) - \bm{\Xi})\phi(\bm{x}) \\
+    &= \frac{1}{\theta_{i}}\sum_{j = 1}^{n} a^{(i)}_{j}\left[\mathcal{K}(\bm{x}^{(j)}, \bm{x}) - \frac{1}{n}\sum_{k = 1}^{n} \mathcal{K}(\bm{x}^{(k)}, \bm{x})\right]
+\end{align*}
+となるので, カーネル行列を計算できればよい.
+\end{algorithm}
+
+
 \section{モデルの評価とハイパーパラメータのチューニングのベストプラクティス}
 \subsection{$k$分割交差検証を使ったモデルの性能の評価}
 機械学習の汎化性能を評価する代表的な手法として, ホールドアウト法と$k$分割交差検証がある.
@@ -719,4 +943,114 @@ ROC曲線やAUCを計算するためには, データセットの各データ点
     \item
     人工的なトレーニングデータを生成する.
 \end{itemize}
+
+
+\section{数学的理論}
+\subsection{カーネル法}
+以下, 本節では$\mathcal{X}$を空でない集合とする.
+\begin{definition}
+    写像$k \colon \mathcal{X} \times \mathcal{X} \to \R$が$\mathcal{X}$上のカーネル関数であるとは, 実Hilbert空間$\mathcal{H}$と関数$\phi \colon \mathcal{X} \to \mathcal{H}$が存在し, 任意の$x, y \in \mathcal{X}$に対して
+    \begin{equation}
+        k(x, y) = \langle\phi(x), \phi(y)\rangle_{\mathcal{H}}
+    \end{equation}
+    が成り立つことをいう.
+    このとき, $\mathcal{H}$を$k$の特徴空間, $\phi$を$k$の特徴写像という.
+\end{definition}
+カーネル関数は半正定値対称関数であることに注意する.
+実際, 任意の$a_{1}, \dots, a_{n} \in \R$, $x_{1}, \dots, x_{n} \in \mathcal{X}$に対して
+\begin{align*}
+    \sum_{i = 1}^{n} \sum_{j = 1}^{n} a_{i}a_{j}k(x_{i}, x_{j})
+    &= \sum_{i = 1}^{n} \sum_{j = 1}^{n} a_{i}a_{j}\langle\phi(x_{i}), \phi(x_{j})\rangle_{\mathcal{H}} \\
+    &= \left\langle\sum_{i = 1}^{n} a_{i}\phi(x_{i}), \sum_{j = 1}^{n} a_{j}\phi(x_{j})\right\rangle_{\mathcal{H}} \\
+    &= \norm{\sum_{i = 1}^{n} a_{i}\phi(x_{i})}^{2} \\
+    &\geq 0
+\end{align*}
+となる.
+実は, この主張の逆も成り立つ.
+\begin{theorem}
+    任意の半正定値対称関数$k \colon \mathcal{X} \times \mathcal{X} \to \R$はカーネル関数である.
+\end{theorem}
+
+この結果により様々なカーネル関数が得られる.
+\begin{lemma}
+    $k$, $l$を$\mathcal{X}$上のカーネル関数, $\alpha > 0$とする.
+    このとき, $\alpha k$, $k + l$は$\mathcal{X}$上のカーネル関数である.
+\end{lemma}
+\begin{lemma}
+    $A \colon \mathcal{X} \to \mathcal{Y}$を写像, $l$を$\mathcal{Y}$上のカーネル関数とする.
+    このとき, 写像$k \colon \mathcal{X} \times \mathcal{X} \to \R$を
+    \begin{equation}
+        k(x, y) := l(A(x), A(y))
+    \end{equation}
+    で定義すると, $k$は$\mathcal{X}$上のカーネル関数である.
+\end{lemma}
+\begin{lemma}
+    $k$, $l$をそれぞれ$\mathcal{X}$, $\mathcal{Y}$上のカーネル関数とする.
+    このとき, 写像$k \times l$は$\mathcal{X} \times \mathcal{Y}$上のカーネル関数である.
+    特に, $\mathcal{X} = \mathcal{Y}$のとき, 写像$kl$は$\mathcal{X}$上のカーネル関数である.
+\end{lemma}
+\begin{corollary}
+    $m \in \N$, $c \geq 0$とする.
+    このとき, 関数$k \colon \R^{d} \times \R^{d} \to \R$を
+    \begin{equation}
+        k(x, y) = \left(\langle x, y\rangle + c)\right)^{m}
+    \end{equation}
+    で定義すると, $k$は$\R^{d}$上のカーネル関数である.
+    これを多項式カーネル関数という.
+\end{corollary}
+\begin{lemma}
+    関数$f \colon \R \to \R$が
+    \begin{equation}
+        f(z) = \sum_{n = 0}^{\infty} a_{n}z^{n}, \quad a_{n} \geq 0, |z| < r, r > 0
+    \end{equation}
+    という形にTaylor展開されるとする.
+    このとき, $\mathcal{X} = \{x \in \R^{d} | \norm{x} < \sqrt{r}\}$として, 関数$k \colon \mathcal{X} \times \mathcal{X} \to \R$を
+    \begin{equation}
+        k(x, y) = f(\langle x, y \rangle)
+    \end{equation}
+    で定義すると, $k$は$\mathcal{X}$上のカーネル関数である.
+\end{lemma}
+\begin{corollary}
+    関数$k \colon \R^{d} \times \R^{d} \to \R$を
+    \begin{equation}
+        k(x, y) = \exp\left(\langle x, y\rangle\right)
+    \end{equation}
+    で定義すると, $k$は$\R^{d}$上のカーネル関数である.
+    これを指数カーネル関数という.
+\end{corollary}
+\begin{corollary}
+    関数$k \colon \R^{d} \times \R^{d} \to \R$を
+    \begin{equation}
+        k(x, y) = \exp\left(-\gamma\norm{x - y}^{2}\right)
+    \end{equation}
+    で定義すると, $k$は$\R^{d}$上のカーネル関数である.
+    これをGaussカーネル関数または動径基底関数という.
+\end{corollary}
+
+\begin{definition}
+    $\mathcal{H}$を$\mathcal{X}$上の実数値関数からなる実Hilbert空間とする.
+    写像$k \colon \mathcal{X} \times \mathcal{X} \to \mathcal{H}$が以下の条件を満たすとき, $k$を$\mathcal{H}$上の再生カーネル関数といい, $\mathcal{H}$を再生核Hilbert空間という.
+    \begin{enumerate}
+        \item
+        $\forall \, x \in \mathcal{X} \quad k(\cdot, x) \in \mathcal{H}$
+        \item
+        $\forall \, x \in \mathcal{X} \quad \forall \, f \in \mathcal{H} \quad \langle f, k(\cdot, x) \rangle_{\mathcal{H}} = f(x)$
+    \end{enumerate}
+\end{definition}
+
+\begin{theorem}
+    (Moore-Aronszajnの定理)
+    $\mathcal{X}$上のカーネル関数$k$に対して, 再生核Hilbert空間が一意に存在し, $k$が$\mathcal{H}$上の再生カーネル関数になる.
+\end{theorem}
+
+\begin{thebibliography}{9}
+    \bibitem{Sebastian}
+    [第2版] Python機械学習プログラミング 達人データサイエンティストによる理論と実践, Sebastian Raschka, Vahid Mirjalili(著), 福島真太朗(監訳), 2018, インプレス
+    \bibitem{Kanamori}
+    機械学習のための連続最適化, 金森敬文, 鈴木大慈, 竹内一朗, 佐藤一誠, 2016, 講談社
+    \bibitem{Arthur}
+    Introduction to RKHS, and some simple kernel algorithms, Arthur Gretton, 2019, \url{http://www.gatsby.ucl.ac.uk/~gretton/coursefiles/lecture4_introToRKHS.pdf}
+    \bibitem{Scholkopf}
+    Nonlinear Component Analysis as a Kernel Eigenvalue Problem, Sch\"{o}lkopf, Bernhard, 1998, Neural Computation. 10 (5): 1299–1319
+\end{thebibliography}
 \end{document}
