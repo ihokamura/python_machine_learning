@@ -10,7 +10,7 @@ import numpy as np
 def plot_features(
     X, y,
     test_idx=None,
-    xlabel='x', ylabel='y',
+    xlabel='x', ylabel='y', title=None,
     loc='best'):
     """
     plot features
@@ -27,6 +27,8 @@ def plot_features(
         label of x-axis
     * ylabel : string
         label of y-axis
+    * title : string or None
+        title of graph
     * loc : string or int
         location of legend
 
@@ -38,10 +40,6 @@ def plot_features(
     # prepare for markers and color maps
     markers = ('s', 'x', 'o', '^', 'v')
     colors = ('red', 'blue', 'lightgreen', 'gray', 'cyan')
-
-    # prepare for plot area and generate grid points
-    x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
-    y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
 
     # plot training data
     for color, marker, label in zip(colors, markers, np.unique(y)):
@@ -55,11 +53,11 @@ def plot_features(
                     alpha=1.0, c='', marker='o', edgecolor='black', linewidth=1, s=100, label='test_set')
 
     # configure plot area
-    plt.xlim(x_min, x_max)
-    plt.ylim(y_min, y_max)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.legend(loc=loc)
+    if title is not None:
+        plt.title(title)
     plt.show()
 
 
