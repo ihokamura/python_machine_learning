@@ -55,9 +55,11 @@ def plot_features(
     # configure plot area
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.legend(loc=loc)
     if title is not None:
         plt.title(title)
+    plt.legend(loc=loc)
+
+    # show plot
     plt.show()
 
 
@@ -66,7 +68,7 @@ def plot_decision_regions(
     classifier,
     test_idx=None,
     resolution=0.02,
-    xlabel='x', ylabel='y',
+    xlabel='x', ylabel='y', title=None,
     loc='best'):
     """
     plot decision regions
@@ -88,6 +90,8 @@ def plot_decision_regions(
         label of x-axis
     * ylabel : string
         label of y-axis
+    * title : string or None
+        title of graph
     * loc : string or int
         location of legend
     """
@@ -125,5 +129,9 @@ def plot_decision_regions(
     plt.ylim(x2.min(), x2.max())
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
+    if title is not None:
+        plt.title(title)
     plt.legend(loc=loc)
+
+    # show plot
     plt.show()
