@@ -5,12 +5,12 @@ utility to load sample data
 import abc
 
 import numpy as np
-from sklearn.datasets import load_breast_cancer, load_iris, load_wine
+from sklearn.datasets import load_boston, load_breast_cancer, load_iris, load_wine
 
 
-class SampleData(abc.ABC):
+class ClassificationData(abc.ABC):
     """
-    sample dataset in scikit-learn
+    dataset for classification in scikit-learn
 
     # Parameters
     -----
@@ -37,7 +37,7 @@ class SampleData(abc.ABC):
         data_bunch = self.load_data()
         if features is None:
             features = data_bunch.feature_names
-        feature_index = np.array(list(f in features for f in data_bunch.feature_names))
+        feature_index = np.array(list(tuple(data_bunch.feature_names).index(f) for f in features))
         if labels is None:
             labels = data_bunch.target_names
         label_map = {value:name for value, name in enumerate(data_bunch.target_names)}
@@ -74,7 +74,59 @@ class SampleData(abc.ABC):
         """
 
 
-class IrisData(SampleData):
+class RegressionData(abc.ABC):
+    """
+    dataset for regression in scikit-learn
+
+    # Parameters
+    -----
+    * features : iterable
+        list of features in training data
+        All the features are retrieved if None.
+
+    # Attributes
+    -----
+    * X : array-like, shape = ((number of samples), (number of features))
+        training data
+    * y : array-like, shape = ((number of samples), )
+        target variable
+    * features : list
+        list of features in training data
+    """
+
+    def __init__(self, features=None):
+        data_bunch = self.load_data()
+        if features is None:
+            features = data_bunch.feature_names
+        feature_index = np.array(list(tuple(data_bunch.feature_names).index(f) for f in features))
+
+        X = data_bunch.data[:, feature_index]
+        y = data_bunch.target
+
+        self.__features = list(features)
+        self.__X = X
+        self.__y = y
+
+    @property
+    def X(self):
+        return self.__X
+
+    @property
+    def y(self):
+        return self.__y
+
+    @property
+    def features(self):
+        return self.__features
+
+    @abc.abstractclassmethod
+    def load_data(cls):
+        """
+        load the original data
+        """
+
+
+class IrisData(ClassificationData):
     """
     Iris dataset
 
@@ -113,7 +165,7 @@ class IrisData(SampleData):
         return load_iris()
 
 
-class WineData(SampleData):
+class WineData(ClassificationData):
     """
     Wine dataset
 
@@ -161,7 +213,7 @@ class WineData(SampleData):
         return load_wine()
 
 
-class BreastCancerData(SampleData):
+class BreastCancerData(ClassificationData):
     """
     Breast Cancer Wisconsin dataset
 
@@ -223,3 +275,42 @@ class BreastCancerData(SampleData):
     @classmethod
     def load_data(cls):
         return load_breast_cancer()
+
+
+class HousingData(RegressionData):
+    """
+    Boston Housing dataset
+
+    # Parameters
+    -----
+    * features : iterable
+        list of features in training data
+        All the features are retrieved if None.
+        The Boston Housing dataset has the following features.
+        * CRIM
+        * ZN
+        * INDUS
+        * CHAS
+        * NOX
+        * RM
+        * AGE
+        * DIS
+        * RAD
+        * TAX
+        * PTRATIO
+        * B
+        * LSTAT
+
+    # Attributes
+    -----
+    * X : array-like, shape = ((number of samples), (number of features))
+        training data
+    * y : array-like, shape = ((number of samples), )
+        target variable
+    * features : list
+        list of features in training data
+    """
+
+    @classmethod
+    def load_data(cls):
+        return load_boston()
