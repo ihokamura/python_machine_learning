@@ -135,3 +135,60 @@ def plot_decision_regions(
 
     # show plot
     plt.show()
+
+
+def plot_predictions(
+    X, y,
+    regressor,
+    test_idx=None,
+    resolution=0.02,
+    xlabel='x', ylabel='y', title=None,
+    loc='best'):
+    """
+    plot predictions of regressor
+
+    # Parameters
+    -----
+    * X : array-like, shape = (n_samples, 2)
+        sample data
+    * y : array-like, shape = (n_samples, )
+        target variable
+    * regressor : object
+        instance of regressor, which needs to implement the following methods
+            * regressor.predict : returns the prediction value of a sample
+    * test_idx : list
+        list of indexes of test data in X and y
+    * resolution : float
+        resolution of plot area
+    * xlabel : string
+        label of x-axis
+    * ylabel : string
+        label of y-axis
+    * title : string or None
+        title of graph
+    * loc : string or int
+        location of legend
+    """
+
+    # plot prediction of regressor
+    plt.plot(X, regressor.predict(X))
+
+    # plot training data
+    plt.scatter(x=X, y=y,
+                c='steelblue', edgecolor='white', s=70)
+
+    # plot test data
+    if test_idx:
+        plt.scatter(x=X[test_idx, 0], y=X[test_idx, 1],
+                    alpha=1.0, c='', marker='o', edgecolor='black', linewidth=1, s=100, label='test_set')
+
+    # configure plot area
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    if title is not None:
+        plt.title(title)
+    if test_idx is not None:
+        plt.legend(loc=loc)
+
+    # show plot
+    plt.show()
