@@ -45,7 +45,7 @@ def main():
 
         # show prediction
         plot_predictions(
-            X_std, y_std, regressor,
+            X_std.flatten(), y_std, regressor,
             xlabel='RM (standardized)', ylabel='MEDV (standardized)', title=r'$\eta$ = {}'.format(regressor.eta))
 
         # show a sample of non-standardized prediction and weights

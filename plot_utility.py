@@ -138,7 +138,7 @@ def plot_decision_regions(
 
 
 def plot_predictions(
-    X, y,
+    x, y,
     regressor,
     test_idx=None,
     resolution=0.02,
@@ -149,7 +149,7 @@ def plot_predictions(
 
     # Parameters
     -----
-    * X : array-like, shape = (n_samples, 2)
+    * x : array-like, shape = (n_samples, )
         sample data
     * y : array-like, shape = (n_samples, )
         target variable
@@ -171,16 +171,20 @@ def plot_predictions(
     """
 
     # plot prediction of regressor
-    plt.plot(X, regressor.predict(X))
+    plt.plot(
+        x, regressor.predict(x[:, np.newaxis]),
+        color='black', lw=1)
 
     # plot training data
-    plt.scatter(x=X, y=y,
-                c='steelblue', edgecolor='white', s=70)
+    plt.scatter(
+        x=x, y=y,
+        c='steelblue', edgecolor='white', s=70, label='training data')
 
     # plot test data
     if test_idx:
-        plt.scatter(x=X[test_idx, 0], y=X[test_idx, 1],
-                    alpha=1.0, c='', marker='o', edgecolor='black', linewidth=1, s=100, label='test_set')
+        plt.scatter(
+            x=x[test_idx], y=y[test_idx],
+            alpha=1.0, c='', marker='o', edgecolor='black', linewidth=1, s=100, label='test data')
 
     # configure plot area
     plt.xlabel(xlabel)
