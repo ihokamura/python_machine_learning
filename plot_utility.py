@@ -193,3 +193,61 @@ def plot_predictions(
 
     # show plot
     plt.show()
+
+
+def plot_residuals(
+    X, y,
+    regressor,
+    test_idx=None,
+    xlabel='predicted values', ylabel='residuals', title=None,
+    loc='best'):
+    """
+    plot residuals of regressor
+
+    # Parameters
+    -----
+    * X : array-like, shape = (n_samples, n_features)
+        sample data
+    * y : array-like, shape = (n_samples, )
+        target variable
+    * regressor : object
+        instance of regressor, which needs to implement the following methods
+            * regressor.predict : returns the prediction value of a sample
+    * test_idx : list
+        list of indexes of test data in X and y
+    * xlabel : string
+        label of x-axis
+    * ylabel : string
+        label of y-axis
+    * title : string or None
+        title of graph
+    * loc : string or int
+        location of legend
+    """
+
+    # plot residual of training data
+    y_pred = regressor.predict(X)
+    scatter_x, scatter_y = y_pred, y_pred - y
+    plt.scatter(
+        x=scatter_x, y=scatter_y,
+        c='steelblue', marker='o', edgecolor='white', label='training data')
+
+    # mark residual of test data
+    if test_idx:
+        plt.scatter(
+            x=scatter_x[test_idx], y=scatter_y[test_idx],
+            alpha=1.0, c='', marker='o', edgecolor='black', linewidth=1, s=75, label='test data')
+
+    # plot perfect prediction
+    plt.hlines(y=0, xmin=-10, xmax=50, color='black', lw=1)
+
+    # configure plot area
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    if title is not None:
+        plt.title(title)
+    if test_idx is not None:
+        plt.legend(loc=loc)
+
+    # show plot
+    plt.show()
