@@ -141,7 +141,6 @@ def plot_predictions(
     x, y,
     regressor,
     test_idx=None,
-    resolution=0.02,
     xlabel='x', ylabel='y', title=None,
     loc='best'):
     """
@@ -158,8 +157,6 @@ def plot_predictions(
             * regressor.predict : returns the prediction value of a sample
     * test_idx : list
         list of indexes of test data in X and y
-    * resolution : float
-        resolution of plot area
     * xlabel : string
         label of x-axis
     * ylabel : string
