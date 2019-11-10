@@ -945,6 +945,129 @@ ROC曲線やAUCを計算するためには, データセットの各データ点
 \end{itemize}
 
 
+\section{回帰分析}
+\subsection{線型回帰}
+回帰モデルとは, 連続値の目的変数を予測するモデルである.
+特に, 説明変数の線型関数として目的変数を表す回帰を線型回帰と呼ぶ.
+
+\subsection{Housingデータセットの探索}
+機械学習モデルを構築する前に探索的データ解析を行うことが推奨される.
+これは, 散布図, ヒストグラム, 相関行列などからデータの相関関係や外れ値を見出す作業である.
+
+\subsection{最小二乗線型回帰モデルの実装}
+トレーニングデータとして, 入力値$\bm{x}^{(i)} \in \R^{m}$と対応するクラス$y^{(i)} \in \R$ $(i = 1, \dots, n)$が与えられているとする.
+最小二乗線型回帰モデルでは, コスト関数として誤差平方和
+\begin{equation}
+    J(\bm{w}) = \frac{1}{2}\sum_{i = 1}^{n} (y^{(i)} - \bm{w}^{T}\bm{x})^{2}
+\end{equation}
+を利用し, 勾配降下法により最適な重み$\bm{w}$を探索する.
+
+\subsection{RANSACを使ったロバスト回帰モデルの学習}
+線型回帰モデルは外れ値の影響を受けやすい.
+RANSAC(RANdom SAmple Cosensus)アルゴリズムは回帰モデルに正常値(外れ値でないデータ点からなるサブセット)を学習させる.
+\begin{algorithm}
+    (RANSAC)
+    \begin{enumerate}
+        \item
+        ランダムな個数のデータ点を正常値として選択し, モデルを学習させる.
+
+        \item
+        (1)のモデルでその他のデータ点を評価し, 許容範囲に収まるデータ点を正常値に追加する.
+
+        \item
+        すべての正常値を利用してモデルを学習させる.
+
+        \item
+        学習済みモデルの誤差を推定する.
+
+        \item
+        誤差が閾値より小さいまたは繰り返し回数の上限に到達した場合, アルゴリズムを終了する.
+        そうでない場合, (1)に戻る.
+    \end{enumerate}
+\end{algorithm}
+
+\subsection{線型回帰モデルの性能評価}
+分類モデルと同じように, 回帰モデルでもトレーニングデータセットで学習を行い, テストデータセットでその性能を評価することが重要である.
+いま, 目的変数の真値を$y^{(i)}$, 回帰モデルによる予測値を$\hat{y}^{(i)}$ $(i = 1, \dots, n)$とする.
+線型回帰モデルの代表的な性能指標には次のようなものがある.
+\begin{itemize}
+    \item
+    残差：テストデータの予測値と真値の差を計算する.
+    \begin{equation}
+        E_{r}^{(i)} = y^{(i)} - \hat{y}^{(i)}
+    \end{equation}
+    残差プロットに規則性が現れる場合, 回帰モデルはデータセットの情報の一部を捉えられていない.
+
+    \item
+    平均二乗誤差：テストデータの統計的分散を計算する.
+    \begin{equation}
+        E_{\mathrm{MSE}} = \frac{1}{n}\sum_{i = 1}^{n} (y^{(i)} - \hat{y}^{(i)})^{2}
+    \end{equation}
+
+    \item
+    決定係数：平均二乗誤差を目的変数の真値で標準化する.
+    \begin{equation}
+        \left\{
+        \begin{aligned}
+            &R^{2} = 1 - \frac{E_{\mathrm{MSE}}}{\sigma_{y}} \\
+            &\sigma_{y} = \frac{1}{n}\sum_{i = 1}^{n} (y^{(i)} - \mu_{y})^{2} \\
+            &\mu_{y} = \frac{1}{n}\sum_{i = 1}^{n} y^{(i)}
+        \end{aligned}
+        \right.
+    \end{equation}
+\end{itemize}
+
+\subsection{回帰に正則化手法を適用する}
+線型回帰に対する代表的な正則化手法は以下の3つである.
+\begin{itemize}
+    \item
+    リッジ回帰：コスト関数に$L^{2}$ペナルティを課す.
+    \begin{equation}
+        J(\bm{w}) = \frac{1}{2}\sum_{i = 1}^{n} (y^{(i)} - \bm{w}^{T}\bm{x}^{(i)})^{2} + \lambda\sum_{k = 1}^{m} |w_{j}|^{2}
+    \end{equation}
+
+    \item
+    LASSO(Least Absolute Shrinkage and Selection Operator：コスト関数に$L^{1}$ペナルティを課す.
+    \begin{equation}
+        J(\bm{w}) = \frac{1}{2}\sum_{i = 1}^{n} (y^{(i)} - \bm{w}^{T}\bm{x}^{(i)})^{2} + \lambda\sum_{k = 1}^{m} |w_{j}|
+    \end{equation}
+
+    \item
+    Elastic Net法：コスト関数に$L^{1}$ペナルティおよび$L^{2}$ペナルティを課す.
+    \begin{equation}
+        J(\bm{w}) = \frac{1}{2}\sum_{i = 1}^{n} (y^{(i)} - \bm{w}^{T}\bm{x}^{(i)})^{2} + \lambda_{1}\sum_{k = 1}^{m} |w_{j}| + \lambda_{2}\sum_{k = 1}^{m} |w_{j}|^{2}
+    \end{equation}
+\end{itemize}
+
+\subsection{多項式回帰：線型回帰モデルから曲線を見い出す}
+説明変数と目的変数の関係が非線形の場合, 単純な線型回帰はうまく機能しない.
+この問題に対処する一つの方法は, 説明変数の高次の項を追加したうえで線型回帰を適用するというものである.
+つまり,
+\begin{equation}
+    J(\bm{w}) = \sum_{d = 0}^{m} \sum_{|I_{d}| = 0}w_{d, I_{d}}\bm{x}^{I_{d}}
+\end{equation}
+というコスト関数に対して線型回帰を適用する.
+ただし, $I_{d}$は長さ$d$の多重指数, $\bm{x} = (\bm{x}^{(1)}, \dots, \bm{x}^{(n)})$である.
+
+多項式の次数が大きくなるほどモデルが複雑になるため, 過学習に陥りやすい.
+また, 多項式は非線形関係を表現する唯一の方法ではなく, 指数関数など別の関数形を仮定して回帰を適用するべき場合もある.
+
+\subsection{ランダムフォレストを使って非線形関係に対処する}
+決定木は回帰問題に適用することができる.
+この場合, ノードの不純度として二乗平均誤差
+\begin{equation}
+    \left\{
+    \begin{aligned}
+        &I(D) = \frac{1}{|D|}\sum_{i \in D} (y^{(i)} - \mu_{D}) \\
+        &\mu_{D} = \frac{1}{|D|}\sum_{i \in D} y^{(i)}
+    \end{aligned}
+    \right.
+\end{equation}
+を利用し, 情報利得が最小となるように決定木を成長させる.
+
+ランダムフォレスト回帰は, このような決定木に対してランダムフォレストアルゴリズムを適用したアンサンブル回帰である.
+すなわち, ランダムフォレスト分類に現れる決定木の情報利得として二乗平均誤差を利用すればよい.
+
 \section{数学的理論}
 \subsection{カーネル法}
 以下, 本節では$\mathcal{X}$を空でない集合とする.
