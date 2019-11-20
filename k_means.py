@@ -14,6 +14,12 @@ class KMeans:
     * n_clusters : int
         number of clusters
 
+    * init : str
+        strategy to choose initial centroids
+        One of the following must be specified:
+            * 'random' : choose initial centroids at random
+            * 'k-means++' : choose initial centroids according to k-means++ method
+
     * n_init : int
         number of times to run k-means algorithm with different centroid seeds
 
@@ -43,8 +49,9 @@ class KMeans:
     * n_features represents the number of features.
     """
 
-    def __init__(self, n_clusters=2, n_init=10, max_iter=100, tol=1.0e-4, random_state=1):
+    def __init__(self, n_clusters=2, init='random', n_init=10, max_iter=100, tol=1.0e-4, random_state=1):
         self.n_clusters = n_clusters
+        self.init = init
         self.n_init = n_init
         self.max_iter = max_iter
         self.tol = tol
@@ -136,10 +143,10 @@ class KMeans:
             centroids of clusters
         """
 
-        # choose initial centroids at random
-        n_samples = X.shape[0]
-        centroids = X[self._rgen.choice(np.arange(n_samples), size=self.n_clusters)]
+        # choose initial centroids
+        centroids = self._init_centroids(X)
 
+        n_samples = X.shape[0]
         cluster_labels = -np.ones((n_samples,))
         for n_iter in range(self.n_clusters):
             change = False
@@ -173,3 +180,31 @@ class KMeans:
 
         # return inertia , iteration times and centroids
         return inertia, n_iter, centroids
+
+    def _init_centroids(self, X):
+        """
+        choose initial centroids
+
+        # Parameters
+        -----
+        * X : array-like, shape = (n_samples, n_features)
+            training data
+
+        # Returns
+        -----
+        * centroids : array-like, shape = (n_clusters, n_features)
+            initial centroids of clusters
+        """
+
+        n_samples = X.shape[0]
+        if self.init == 'random':
+            # choose initial centroids at random
+            return X[self._rgen.choice(n_samples, size=self.n_clusters)]
+        else:
+            # choose initial centroids according to k-means++ method
+            centroid_indices = [self._rgen.choice(n_samples)]
+            for _ in range(self.n_clusters - 1):
+                distances = np.array(list(np.min(list(np.sum((X[i] - X[j])**2) for j in centroid_indices)) for i in range(n_samples)))
+                centroid_indices.append(self._rgen.choice(n_samples, p=distances / np.sum(distances)))
+
+            return X[centroid_indices]

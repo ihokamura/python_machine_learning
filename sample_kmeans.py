@@ -24,12 +24,20 @@ def main():
     clusterings = [
         KMeans(
             n_clusters=3,
+            init='random',
             n_init=10,
+            max_iter=300,
+            tol=1.0e-4,
+            random_state=1),
+        KMeans(
+            n_clusters=3,
+            init='k-means++',
+            n_init=1,
             max_iter=300,
             tol=1.0e-4,
             random_state=1)
     ]
-    names = ['k-means']
+    names = ['k-means', 'k-means++']
 
     for clustering, name in zip(clusterings, names):
         # predict centroid of clusters and label of each data points
