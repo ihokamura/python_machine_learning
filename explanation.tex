@@ -1314,6 +1314,39 @@ scikit-learnではAgglomerativeClusteringクラスにより凝集型階層的ク
 この場合, クラスタの個数を指定してクラスタリングを実行するため, 統合の過程を見るためには異なるクラスタの個数を指定してクラスタリングを実行する必要がある.
 
 
+\subsection{DBSCANを使って高密度の領域を特定する}
+DBSCAN(Density-Based Spatial Clustering of Applications with Noise)は密度ベースクラスタリングの一種である.
+\begin{algorithm}
+    (DBSCAN)
+    \begin{enumerate}
+        \item
+        探索半径$\varepsilon$と探索個数$M$を指定する.
+
+        \item
+        データ点を以下の3種類に分類する.
+        \begin{itemize}
+            \item
+            コア点：そのデータ点から半径$\varepsilon$以内に他のデータ点が$M$個以上存在するデータ点.
+
+            \item
+            ボーダ点：コア点でないデータ点のうち, そのデータ点から半径$\varepsilon$以内にコア点が存在するデータ点.
+
+            \item
+            ノイズ点：コア点でもボーダ点でもないデータ点.
+        \end{itemize}
+
+        \item
+        距離が$\varepsilon$以下のコア点を接続し, クラスタを形成する.
+
+        \item
+        ボーダ点を対応するコア点のクラスタに割り当てる.
+    \end{enumerate}
+\end{algorithm}
+
+k-means法と異なり, DBSCANではクラスタが球状に分布する必要はない.
+また, すべてのデータ点をクラスタに割り当てるとは限らず, ノイズを除去することができる.
+
+
 \section{数学的理論}
 \subsection{カーネル法}
 以下, 本節では$\mathcal{X}$を空でない集合とする.
