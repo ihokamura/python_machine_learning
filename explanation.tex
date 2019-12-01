@@ -1347,6 +1347,122 @@ k-means法と異なり, DBSCANではクラスタが球状に分布する必要�
 また, すべてのデータ点をクラスタに割り当てるとは限らず, ノイズを除去することができる.
 
 
+\section{多層人工ニューラルネットワークを一から実装}
+\subsection{人工ニューラルネットワークによる複雑な関数のモデル化}
+多層フィードフォーワードニューラルネットワーク(または多層パーセプトロン)は複数の単一ニューロンを結合したネットワークである.
+多層パーセプトロンは入力層, 隠れ層, 出力層から構成される.
+隠れ層に含まれるユニットの個数と隠れ層の個数(深さ)は多層パーセプトロンのハイパーパラメータである.
+
+多層パーセプトロンの具体例として, ユニット数$d$の隠れ層が1つだけ存在する多層パーセプトロンを考える.
+また, 各ユニットにおける活性化関数$\phi$としてロジスティック関数
+\begin{equation}
+    \phi(z) = \frac{1}{1 + e^{-z}}
+\end{equation}
+を利用する.
+いま, トレーニングデータとして, 入力値$\bm{x}^{(i)} \in \R^{m}$と対応するクラス$\bm{y}^{(i)} \in \R^{t}$ $(i = 1, \dots, n)$が与えられているとする.
+ここで, $\bm{y}^{(i)}$はサンプル点$\bm{x}^{(i)}$のクラスラベルをone-hotエンコーディングにより表現したベクトルとする.
+このとき, サンプル点$\bm{x}^{(i)}$に対する隠れ層の入力$\bm{z}^{h}$, 隠れ層の出力$\bm{a}^{h}$, 出力層の入力$\bm{z}^{o}$, 出力層の出力$\bm{a}^{o}$はそれぞれ
+\begin{equation}
+    \left\{
+    \begin{aligned}
+        &\bm{a}^{i, (i)} = \bm{x}^{(i)} \\
+        &\bm{z}^{h, (i)} = \bm{W}^{h}\bm{a}^{i, (i)} + \bm{v}^{h} \quad (\bm{W}^{h} \in \R^{d \times m}, \bm{v}^{h} \in \R^{d}) \\
+        &\bm{a}^{h, (i)} = \phi(\bm{z}^{h, (i)}) \\
+        &\bm{z}^{o, (i)} = \bm{W}^{o}\bm{a}^{h, (i)} + \bm{v}^{o} \quad (\bm{W}^{o} \in \R^{t \times d}, \bm{v}^{o} \in \R^{t}) \\
+        &\bm{a}^{o, (i)} = \phi(\bm{z}^{o, (i)})
+    \end{aligned}
+    \right.
+\end{equation}
+で与えられる.
+ただし, $\phi(\bm{z})$はベクトル$\bm{z}$の各成分に活性化関数$\phi$を適用したベクトルを表す.
+これをトレーニングデータ全体にわたる行列で表すと
+\begin{equation}
+    \left\{
+    \begin{aligned}
+        &\bm{A}^{i} = \bm{X} \quad (\bm{X} = (\bm{x}^{(1)}, \dots, \bm{x}^{(n)}) \in \R^{m \times n}) \\
+        &\bm{Z}^{h} = \bm{W}^{h}\bm{A}^{i} + \bm{V}^{h} \quad (\bm{W}^{h} \in \R^{d \times m}, \bm{V}^{h} = (\bm{v}^{h}, \dots, \bm{v}^{h}) \in \R^{d \times n}) \\
+        &\bm{A}^{h} = \phi(\bm{Z}^{h}) \\
+        &\bm{Z}^{o} = \bm{W}^{o}\bm{A}^{h} + \bm{V}^{o} \quad (\bm{W}^{o} \in \R^{t \times d}, \bm{V}^{o} = (\bm{v}^{o}, \dots, \bm{v}^{o}) \in \R^{t \times n}) \\
+        &\bm{A}^{o} = \phi(\bm{Z}^{o})
+    \end{aligned}
+    \right.
+\end{equation}
+となる.
+トレーニングデータが正しく分類される確率は
+\begin{equation}
+    L(\bm{v}^{h}, \bm{W}^{h}, \bm{v}^{o}, \bm{W}^{o}) = \prod_{i = 1}^{n} \prod_{j = 1}^{t} (a^{o}_{ij})^{y^{(i)}_{j}}(1 - a^{o}_{ij})^{1 - y^{(i)}_{j}}
+\end{equation}
+で与えられるので, 多層パーセプトロンの学習は対数尤度
+\begin{equation}
+    J(\bm{v}^{h}, \bm{W}^{h}, \bm{v}^{o}, \bm{W}^{o}) = -\sum_{i = 1}^{n}\sum_{j = 1}^{t} [y^{(i)}_{j}\log{a^{o}_{ij}} + (1 - y^{(i)}_{j})\log(1 - a^{o}_{ij})]
+\end{equation}
+の最適化問題に帰着する.
+
+このコスト関数の勾配は以下のように計算される.
+まず, 
+\begin{align*}
+    \phi'(z) 
+    &= \frac{e^{-z}}{(1 + e^{-z})^{2}} \\
+    &= \phi(z)(1 - \phi(z))
+\end{align*}
+であるから, 
+\begin{align*}
+    \frac{\partial J}{\partial z^{o}_{ij}}
+    &= -\left[y^{(i)}_{j}\frac{1}{a^{o}_{ij}} \cdot a^{o}_{ij}(1 - a^{o}_{ij}) + (1 - y^{(i)}_{j})\frac{-1}{1 - a^{o}_{ij}} \cdot a^{o}_{ij}(1 - a^{o}_{ij})\right] \\
+    &= a^{o}_{ij} - y^{(i)}_{j}
+\end{align*}
+となる.
+よって, 
+\begin{align*}
+    \frac{\partial J}{\partial w^{o}_{ij}}
+    &= \sum_{\mu = 1}^{t}\sum_{\nu = 1}^{n} \frac{\partial J}{\partial z^{o}_{\mu\nu}}\frac{\partial z^{o}_{\mu\nu}}{\partial w^{o}_{ij}}
+    = \sum_{\nu = 1}^{n} (a^{o}_{i\nu} - y^{(i)}_{\nu})a^{h}_{j\nu} \\
+    \frac{\partial J}{\partial v^{o}_{j}}
+    &= \sum_{\mu = 1}^{t}\sum_{\nu = 1}^{n} \frac{\partial J}{\partial z^{o}_{\mu\nu}}\frac{\partial z^{o}_{\mu\nu}}{\partial v^{o}_{j}}
+    = \sum_{\nu = 1}^{n} (a^{o}_{i\nu} - y^{(i)}_{\nu}) \\
+    \frac{\partial J}{\partial a^{h}_{ij}}
+    &= \sum_{\mu = 1}^{t}\sum_{\nu = 1}^{n} \frac{\partial J}{\partial z^{o}_{\mu\nu}}\frac{\partial z^{o}_{\mu\nu}}{\partial a^{h}_{ij}}
+    = \sum_{\mu = 1}^{d} (a^{o}_{\mu j} - y^{(\mu)}_{j})w^{o}_{\mu i}
+\end{align*}
+を得る.
+これより, 
+\begin{align*}
+    \frac{\partial J}{\partial z^{h}_{ij}}
+    &= \frac{\partial J}{\partial a^{h}_{ij}}\frac{\partial a^{h}_{ij}}{\partial z^{h}_{ij}} \\
+    &= \frac{\partial J}{\partial a^{h}_{ij}} \cdot a^{h}_{ij}(1 - a^{h}_{ij})
+\end{align*}
+であるから,
+\begin{align*}
+    \frac{\partial J}{\partial w^{h}_{ij}}
+    &= \sum_{\mu = 1}^{d}\sum_{\nu = 1}^{n} \frac{\partial J}{\partial z^{h}_{\mu\nu}}\frac{\partial z^{h}_{\mu\nu}}{\partial w^{h}_{ij}}
+    = \sum_{\nu = 1}^{n} \frac{\partial J}{\partial z^{h}_{i\nu}}a^{i}_{j\nu}
+    = \sum_{\nu = 1}^{n} \frac{\partial J}{\partial a^{h}_{i\nu}}a^{h}_{i\nu}(1 - a^{h}_{i\nu})x^{(j)}_{\nu} \\
+    \frac{\partial J}{\partial v^{h}_{j}}
+    &= \sum_{\mu = 1}^{d}\sum_{\nu = 1}^{n} \frac{\partial J}{\partial z^{h}_{\mu\nu}}\frac{\partial z^{h}_{\mu\nu}}{\partial v^{h}_{j}}
+    = \sum_{\nu = 1}^{n} \frac{\partial J}{\partial z^{h}_{i\nu}}
+\end{align*}
+となる.
+以上のまとめると, 重みの勾配は
+\begin{equation}
+    \left\{
+    \begin{aligned}
+        \frac{\partial J}{\partial w^{o}_{ij}}
+        &= \sum_{\nu = 1}^{n} (a^{o}_{i\nu} - y^{(i)}_{\nu})a^{h}_{j\nu} \\
+        \frac{\partial J}{\partial v^{o}_{j}}
+        &= \sum_{\nu = 1}^{n} (a^{o}_{i\nu} - y^{(i)}_{\nu}) \\
+        \frac{\partial J}{\partial w^{h}_{ij}}
+        &= \sum_{\nu = 1}^{n} \frac{\partial J}{\partial z^{h}_{i\nu}}a^{i}_{j\nu} \\
+        \frac{\partial J}{\partial v^{h}_{j}}
+        &= \sum_{\nu = 1}^{n} \frac{\partial J}{\partial z^{h}_{i\nu}}
+    \end{aligned}
+    \right.
+\end{equation}
+で与えられる.
+
+ここでは, 最初に隠れ層ー出力層間の重みに関する偏微分を計算し, その結果を利用して入力層ー隠れ層間の重みに関する偏微分を計算している.
+このように, 出力層から入力層に向かって勾配を計算していく方法を逆誤差伝播法という.
+
+
 \section{数学的理論}
 \subsection{カーネル法}
 以下, 本節では$\mathcal{X}$を空でない集合とする.
