@@ -1,5 +1,5 @@
 """
-implement CNN with tf.nn
+implement CNN with tf.compat.v1.nn
 """
 
 import os
@@ -7,45 +7,7 @@ import os
 import numpy as np
 import tensorflow.compat.v1 as tf
 
-
-def generate_batch(X, y, batch_size=64, shuffle=False, random_seed=None):
-    """
-    generate minibatch
-
-    # Parameters
-    -----
-    * X : array-like, shape = (n_samples, n_features)
-        training data
-    * y : array-like, shape = (n_samples, )
-        target variable
-    * batch_size : int
-        size of minibatch
-    * shuffle : bool
-        indicator to check if it is necessary to shuffle data
-    * random_seed : int or `None`
-        random generator seed
-
-    # Yields
-    -----
-    * _ : array-like, shape = (batch_size, n_features)
-        minibatch of training data
-    * _ : array-like, shape = (batch_size, )
-        minibatch of target variable
-
-    # Notes
-    -----
-    * n_samples represents the number of samples.
-    * n_features represents the number of features.
-    """
-
-    index = np.arange(y.shape[0])
-    if shuffle:
-        np.random.RandomState(random_seed).shuffle(index)
-        X = X[index]
-        y = y[index]
-
-    for i in range(0, X.shape[0], batch_size):
-        yield X[i:i + batch_size], y[i:i + batch_size]
+from cnn_utility import generate_batch
 
 
 def construct_convolution_layer(input_tensor, name, kernel_shape, n_output_channels, padding_mode='SAME', strides=(1, 1, 1, 1)):
@@ -213,8 +175,7 @@ def construct_cnn(input_height, input_width, n_outputs, learning_rate=0.001):
     # predict class label
     predictions = {
         'probabilities':tf.nn.softmax(h4, name='probabilities'),
-        'labels':tf.cast(tf.argmax(h4, axis=1), tf.int32, name='labels')
-    }
+        'labels':tf.cast(tf.argmax(h4, axis=1), tf.int32, name='labels')}
 
     # define cost function and optimizer
     cross_entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=h4, labels=tf_y_onehot), name='cross_entropy_loss')
@@ -265,18 +226,22 @@ def train(sess, training_set, validation_set=None, initialize=True, epochs=20, s
     # initialize random generator
     np.random.seed(random_seed)
 
+    # train model for given epochs
     for epoch in range(1, epochs + 1):
         batch = generate_batch(X_data, y_data, shuffle=shuffle)
-        average_loss = 0.0
+        sum_of_loss = 0.0
 
         for i, (batch_X, batch_y) in enumerate(batch):
             feed = {'tf_X:0':batch_X, 'tf_y:0':batch_y, 'fc_keep_probability:0':dropout}
             loss, _ = sess.run(['cross_entropy_loss:0', 'train_optimizer'], feed_dict=feed)
-            average_loss += loss
+            sum_of_loss += loss
 
-        training_loss.append(average_loss/(i + 1))
-        print('epoch {0:2d} training average loss: {1:7.3f}'.format(epoch, average_loss), end=' ')
+        # save and show the mean of loss over a minibatch
+        training_loss.append(sum_of_loss/(i + 1))
+        print('epoch {0:2d} training average loss: {1:7.3f}'.format(epoch, sum_of_loss), end=' ')
+
         if validation_set is not None:
+            # show accuracy for validation data
             feed = {'tf_X:0':validation_set[0], 'tf_y:0':validation_set[1], 'fc_keep_probability:0':1.0}
             validation_accuracy = sess.run('accuracy:0', feed_dict=feed)
             print(' validation accuracy: {0:7.3f}'.format(validation_accuracy))
@@ -284,7 +249,7 @@ def train(sess, training_set, validation_set=None, initialize=True, epochs=20, s
             print(' ')
 
 
-def predict(sess, X_test, return_proba=False):
+def predict(sess, X, return_proba=False):
     """
     predict by CNN model
 
@@ -310,7 +275,7 @@ def predict(sess, X_test, return_proba=False):
     * n_outputs represents the number of outputs (class labels).
     """
 
-    feed = {'tf_X:0':X_test, 'fc_keep_probability:0':1.0}
+    feed = {'tf_X:0':X, 'fc_keep_probability:0':1.0}
     if return_proba:
         return sess.run('probabilities:0', feed_dict=feed)
     else:
@@ -336,6 +301,7 @@ def save(saver, sess, epoch, path='./model/'):
     -----
     * None
     """
+
     if not os.path.isdir(path):
         os.makedirs(path)
 
