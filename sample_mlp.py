@@ -11,14 +11,14 @@ from sklearn.preprocessing import StandardScaler
 
 from mlp import MLP
 
-IMAGEG_SHAPE = (8, 8)
+IMAGE_SHAPE = (8, 8)
 
 
 def show_images(X, y, y_pred):
         _, ax = plt.subplots(nrows=3, ncols=3, sharex=True, sharey=True)
         ax = ax.flatten()
         for axis, data, label, label_pred in zip(ax, X, y, y_pred):
-            axis.imshow(data.reshape(IMAGEG_SHAPE), cmap='Greys')
+            axis.imshow(data.reshape(IMAGE_SHAPE), cmap='Greys')
             axis.set_title('true:{0}/pred:{1}'.format(label, label_pred))
         ax[0].set_xticks([])
         ax[0].set_yticks([])
